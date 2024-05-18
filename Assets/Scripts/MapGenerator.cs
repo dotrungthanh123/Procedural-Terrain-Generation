@@ -15,13 +15,18 @@ public class MapGenerator : Singleton<MapGenerator>
     public DrawMode drawMode;
     public const int chunkSize = 241;
     public float zoom;
+    [Tooltip("Number of layers")]
     public int octaves;
+    [Tooltip("Later octave influence")]
     public float persistance; // Reduce later octave influence
+    [Tooltip("More detail")]
     public float lacrunarity; // Add more detail
     public int seed;
     public Vector2 offset;
     public float heightScale;
     public AnimationCurve heightCurve;
+    [Range(0, 6)]
+    [Tooltip("Increase this reduce level of detail")]
     public int levelOfDetail; // Increase this reduce level of detail
     public bool autoUpdate;
 

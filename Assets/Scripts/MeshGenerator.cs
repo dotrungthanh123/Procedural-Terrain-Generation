@@ -6,31 +6,30 @@ public static class MeshGenerator
 {
     public static MeshData GenerateTerrainMesh(float[,] heightMap)
     {
-        int width = heightMap.GetLength(0);
-        int height = heightMap.GetLength(1);
-
-        MeshData meshData = new MeshData(width, height);
-
+        int chunkSize = MapGenerator.chunkSize;
         int levelOfDetail = MapGenerator.Ins.levelOfDetail;
         int meshSimplicationIncrement = levelOfDetail == 0 ? 1 : levelOfDetail * 2;
+        int verticesPerLine = (chunkSize - 1) / meshSimplicationIncrement + 1;
+
+        MeshData meshData = new MeshData(verticesPerLine, verticesPerLine);
 
         // Center the mesh
-        float topLeftX = (width - 1) / -2f;
-        float topLeftY = (height - 1) / 2f;
+        float topLeftX = (chunkSize - 1) / -2f;
+        float topLeftY = (chunkSize - 1) / 2f;
 
         int verticeIndex = 0;
 
-        for (int x = 0; x < width; x++)
+        for (int x = 0; x < chunkSize; x += meshSimplicationIncrement)
         {
-            for (int y = 0; y < height; y++)
+            for (int y = 0; y < chunkSize; y += meshSimplicationIncrement)
             {
                 meshData.vertices[verticeIndex] = new Vector3(topLeftX + x, MapGenerator.Ins.heightCurve.Evaluate(heightMap[x, y]) * MapGenerator.Ins.heightScale, topLeftY - y);
-                meshData.uvs[verticeIndex] = new Vector2(x / (float)width, y / (float)height);
+                meshData.uvs[verticeIndex] = new Vector2(x / (float)chunkSize, y / (float)chunkSize);
 
-                if (x < width - 1 && y < height - 1)
+                if (x < chunkSize - 1 && y < chunkSize - 1)
                 {
-                    meshData.AddTriangle(verticeIndex, verticeIndex + height, verticeIndex + height + 1);
-                    meshData.AddTriangle(verticeIndex, verticeIndex + height + 1, verticeIndex + 1);
+                    meshData.AddTriangle(verticeIndex, verticeIndex + verticesPerLine, verticeIndex + verticesPerLine + 1);
+                    meshData.AddTriangle(verticeIndex, verticeIndex + verticesPerLine + 1, verticeIndex + 1);
                 }
 
                 verticeIndex++;
