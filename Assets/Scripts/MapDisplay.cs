@@ -3,31 +3,25 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 
-public class MapDisplay : MonoBehaviour
+public class MapDisplay : Singleton<MapDisplay>
 {
-    [NonSerialized]
-    public Renderer meshRenderer;
-    [NonSerialized]
+    [Header("Texture Render")]
+    public Renderer textureRenderer;
+    [Header("Mesh Render")]
     public MeshFilter meshFilter;
+    public MeshRenderer meshRenderer;
     public FilterMode filterMode;
     public TextureWrapMode wrapMode;
 
-    public void DrawTexture(Texture texture) {
-        meshRenderer = GetComponent<Renderer>();
-
-        meshRenderer.sharedMaterial.mainTexture = texture;
-        meshRenderer.sharedMaterial.mainTexture.wrapMode = wrapMode;
-        meshRenderer.sharedMaterial.mainTexture.filterMode = filterMode;
-        
-        transform.localScale = new Vector3(texture.width, 1, texture.height);
+    public void DrawTexture(Texture2D texture) {
+        textureRenderer.sharedMaterial.mainTexture = texture;
+        textureRenderer.transform.localScale = new Vector3(texture.width, 1, texture.height);
     }
 
-    public void DrawMesh(float[,] noiseMap, Texture texture) {
-        meshFilter = GetComponent<MeshFilter>();
-        meshRenderer = GetComponent<Renderer>();
-
+    public void DrawMesh(float[,] noiseMap, DrawMode drawMode) {
+        Texture texture = TextureGenerator.GenerateTexture(noiseMap, drawMode);
         Mesh mesh = MeshGenerator.GenerateTerrainMesh(noiseMap).GenerateMesh();
         meshFilter.sharedMesh = mesh;     
-        meshRenderer.sharedMaterial.mainTexture = texture;   
+        meshRenderer.sharedMaterial.mainTexture = texture;
     }
 }
