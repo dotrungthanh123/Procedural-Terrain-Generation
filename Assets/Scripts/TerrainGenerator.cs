@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class TerrainGenerator : Singleton<TerrainGenerator>
 {
-    public const float maxViewDistance = 300;
+    public const float maxViewDistance = 600;
     public Transform viewer;
     public Material terrainMaterial;
 
