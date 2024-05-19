@@ -1,4 +1,4 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,6 +6,7 @@ public class TerrainGenerator : Singleton<TerrainGenerator>
 {
     public const float maxViewDistance = 300;
     public Transform viewer;
+    public Material terrainMaterial;
 
     public static Vector2 viewerPosition;
     
@@ -46,7 +47,7 @@ public class TerrainGenerator : Singleton<TerrainGenerator>
                 Vector2 chunkCoord = new Vector2(currentChunkCoordX + x, currentChunkCoordY + y);
 
                 if (!chunkSpawned.ContainsKey(chunkCoord)) {
-                    chunkSpawned[chunkCoord] = new TerrainChunk(chunkCoord, chunkSize);
+                    chunkSpawned[chunkCoord] = new TerrainChunk(chunkCoord, chunkSize, terrainMaterial);
                 }
 
                 chunkSpawned[chunkCoord].UpdateVisible();
@@ -62,23 +63,51 @@ public class TerrainGenerator : Singleton<TerrainGenerator>
         GameObject meshObject;
         Vector2 position;
         Bounds bounds;
+        MeshRenderer meshRenderer;
+        MeshFilter meshFilter;
 
-        public TerrainChunk(Vector2 coord, int size) {
+        public TerrainChunk(Vector2 coord, int size, Material material) {
             position = coord * size;
             Vector3 positionV3 = new Vector3(position.x, 0, position.y);
             bounds = new Bounds(position, Vector2.one * size);
             
-            meshObject = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            meshObject = new GameObject("Terrain Chunk");
+            meshRenderer = meshObject.AddComponent<MeshRenderer>();
+            meshFilter = meshObject.AddComponent<MeshFilter>();
+            meshRenderer.material = material;
+
             meshObject.transform.parent = Ins.transform;
             meshObject.transform.position = positionV3;
             meshObject.transform.localScale = Vector3.one * size / 10f; // Base size of plane is 10 so divide by 10 to get size 1
             SetVisible(false);
+
+            Generate(OnMapDataReceived);
+        }
+
+        private void Generate(Action<MapData> callback) {
+            MapGenerator.Ins.RequestMapData(position, callback);
+        }
+
+        // Go to Generate -> RequestMapData -> MapDataCallback -> MapThreadInfo -> Executed in Update
+        private void OnMapDataReceived(MapData mapData) {
+            meshRenderer.material.mainTexture = TextureGenerator.GenerateTextureFromColor(mapData.colors, mapData.heightMap);
+            RequestMeshData(mapData, OnMeshDataReceived);
+        }
+
+        private void RequestMeshData(MapData mapData, Action<MeshData> callback) {
+            MapGenerator.Ins.RequestMeshData(mapData.heightMap, callback);
+        }
+
+        private void OnMeshDataReceived(MeshData meshData) {
+            Mesh mesh = meshData.GenerateMesh();
+            meshFilter.mesh = mesh;
         }
 
         public void UpdateVisible() {
             float distanceToViewer = Mathf.Sqrt(bounds.SqrDistance(viewerPosition));
             bool visible = distanceToViewer <= maxViewDistance;
             if (visible != Visible) SetVisible(visible);
+            meshObject.transform.localScale = Vector3.one;
         }
 
         public void SetVisible(bool visible) {

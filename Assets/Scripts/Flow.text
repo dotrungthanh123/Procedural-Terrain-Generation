@@ -1,1 +1,4 @@
 Button / Changes (MapGeneratorEditor) -> MapGenerator -> Noise -> MapGenerator -> MapDisplay
+
+TerrainChunk = texture (generated once) + mesh (generated multiple times)
+Both need height map (generated once) -> stored texture and height map in 1 object

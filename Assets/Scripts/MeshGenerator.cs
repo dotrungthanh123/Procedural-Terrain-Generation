@@ -4,6 +4,7 @@ using UnityEngine;
 
 public static class MeshGenerator
 {
+    // Return mesh data instead of mesh because this is called in thread and new mesh must be called outside of thread
     public static MeshData GenerateTerrainMesh(float[,] heightMap)
     {
         int chunkSize = MapGenerator.chunkSize;

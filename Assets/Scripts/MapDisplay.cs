@@ -18,10 +18,9 @@ public class MapDisplay : Singleton<MapDisplay>
         textureRenderer.transform.localScale = new Vector3(texture.width, 1, texture.height);
     }
 
-    public void DrawMesh(float[,] noiseMap, DrawMode drawMode) {
-        Texture texture = TextureGenerator.GenerateTexture(noiseMap, drawMode);
+    public void DrawMesh(float[,] noiseMap, Texture texture) {
         Mesh mesh = MeshGenerator.GenerateTerrainMesh(noiseMap).GenerateMesh();
-        meshFilter.sharedMesh = mesh;     
+        meshFilter.sharedMesh = mesh;
         meshRenderer.sharedMaterial.mainTexture = texture;
     }
 }
